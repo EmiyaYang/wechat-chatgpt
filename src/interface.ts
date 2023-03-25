@@ -1,8 +1,4 @@
 import {ChatCompletionRequestMessage} from "openai";
-import {
-  ContactImpl,
-  RoomImpl
-} from "wechaty/impls";
 
 export interface IConfig {
   api: string;

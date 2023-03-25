@@ -37,7 +37,6 @@ const commands: ICommand[] = [
       }
 
       const messages = DBUtils.getChatMessage(username);
-      console.log("messages", messages);
 
       const userMessages = messages.filter((item) => item.role === "user");
       await this.trySay(

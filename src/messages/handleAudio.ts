@@ -6,8 +6,6 @@ export const isAudioMessage = (message: Message) =>
   message.type() === MessageType.Audio;
 
 export const handleAudio = async (message: Message) => {
-  const messageType = message.type();
-
   // 保存语音文件
   const fileBox = await message.toFileBox();
   let fileName = "./public/" + fileBox.name;
