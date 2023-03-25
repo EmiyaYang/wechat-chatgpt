@@ -27,6 +27,7 @@ export const handleImage = async (message: Message) => {
 
     return message.say(data.text);
   } catch (error: any) {
+    console.log('OCR failed: ', error)
     return message.say("OCR failed, reason: " + error.message);
   }
 };
