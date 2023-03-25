@@ -1,5 +1,5 @@
 import path from "path";
-import Tesseract from "tesseract.js";
+import { createWorker } from "tesseract.js";
 import fse from "fs-extra";
 import { Message } from "wechaty";
 import { MessageType } from "../interface.js";
@@ -16,18 +16,22 @@ export const handleImage = async (message: Message) => {
   const fileName = fileBox.name;
   const destPath = path.join(DOWNLOAD_DIR, fileName);
 
+  const worker = await createWorker({
+    logger: (m) => console.log(m)
+  });
+
   try {
     await fileBox.toFile(destPath);
-    const { data } = await Tesseract.recognize(
-      destPath,
-      // eng; chi_sim
-      "chi_sim",
-      { logger: (m) => console.log(m) }
-    );
+    await worker.loadLanguage("chi_sim");
+    await worker.initialize("chi_sim");
+    const {
+      data: { text }
+    } = await worker.recognize(destPath);
+    await worker.terminate();
 
-    return message.say(data.text);
+    return message.say(text);
   } catch (error: any) {
-    console.log('OCR failed: ', error)
+    console.log("OCR failed: ", error);
     return message.say("OCR failed, reason: " + error.message);
   }
 };
