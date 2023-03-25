@@ -1,15 +1,17 @@
-import {ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum} from "openai";
-import {User} from "./interface";
+import {
+  ChatCompletionRequestMessage,
+  ChatCompletionRequestMessageRoleEnum
+} from "openai";
+import { User } from "./interface";
+import { isTokenOverLimit } from "./utils.js";
 
 /**
  * 使用内存作为数据库
  */
-export const initState: Array<ChatCompletionRequestMessage> = new Array(
-  {
-    "role": ChatCompletionRequestMessageRoleEnum.System,
-    "content": "You are a helpful assistant."
-  }
-)
+export const initState: Array<ChatCompletionRequestMessage> = new Array({
+  role: ChatCompletionRequestMessageRoleEnum.System,
+  content: "You are a helpful assistant."
+});
 
 class DB {
   private static data: User[] = [];
@@ -31,7 +33,7 @@ class DB {
           role: ChatCompletionRequestMessageRoleEnum.System,
           content: "You are a helpful assistant."
         }
-      ],
+      ]
     };
     DB.data.push(newUser);
     return newUser;
@@ -42,7 +44,10 @@ class DB {
    * @param username
    */
   public getUserByUsername(username: string): User {
-    return DB.data.find((user) => user.username === username) || this.addUser(username);
+    return (
+      DB.data.find((user) => user.username === username) ||
+      this.addUser(username)
+    );
   }
 
   /**
@@ -67,6 +72,20 @@ class DB {
     }
   }
 
+    /**
+   * 设置用户的prompt
+   * @param username
+   * @param prompt
+   */
+    public getPrompt(username: string): string | void {
+      const user = this.getUserByUsername(username);
+      if (user) {
+        return user.chatMessage.find(
+          (msg) => msg.role === ChatCompletionRequestMessageRoleEnum.System
+        )!.content
+      }
+    }
+
   /**
    * 添加用户输入的消息
    * @param username
@@ -75,9 +94,14 @@ class DB {
   public addUserMessage(username: string, message: string): void {
     const user = this.getUserByUsername(username);
     if (user) {
+      while (isTokenOverLimit(user.chatMessage)) {
+        // 删除从第2条开始的消息(因为第一条是prompt)
+        user.chatMessage.splice(1, 1);
+      }
+
       user.chatMessage.push({
         role: ChatCompletionRequestMessageRoleEnum.User,
-        content: message,
+        content: message
       });
     }
   }
@@ -90,9 +114,14 @@ class DB {
   public addAssistantMessage(username: string, message: string): void {
     const user = this.getUserByUsername(username);
     if (user) {
+      while (isTokenOverLimit(user.chatMessage)) {
+        // 删除从第2条开始的消息(因为第一条是prompt)
+        user.chatMessage.splice(1, 1);
+      }
+
       user.chatMessage.push({
         role: ChatCompletionRequestMessageRoleEnum.Assistant,
-        content: message,
+        content: message
       });
     }
   }

@@ -126,19 +126,33 @@ docker logs -f wechat-chatgpt
 > 请确认安装的NodeJS版本为18.0.0以上
 
 ```sh
+
 # 克隆项目
 git clone https://github.com/fuergaosi233/wechat-chatgpt.git && cd wechat-chatgpt
 # 安装依赖
 npm install
+
 # 编辑配置
 cp .env.example .env
 vim .env # 使用你喜欢的文本编辑器修改配置文件
 # 启动项目
 npm run dev
 # 如果您是初次登陆，那么需要扫描二维码
+
+# 若启动失败, 提示 chrome 某个版本没有安装, 则手动安装 puppeteer, 通过环境变量跳过 chrome 安装
+npm i puppeteer
+
+# 再次运行, 通过环境变量指定版本, 此时虽然仍会运行失败, 但会提示具体的查找路径
+PUPPETEER_CHROMIUM_REVISION=982053 npm run dev
+
+# 手动下载对应版本, 解压到上述目录.如: https://cdn.npmmirror.com/binaries/chromium-browser-snapshots/Mac/982053/chrome-mac.zip
+# 再次运行
+PUPPETEER_CHROMIUM_REVISION=982053 npm run dev
 ```
 
 > 请确保您的账号可以登陆 [网页版微信](https://wx.qq.com/)。
+
+
 
 ## 📝 Environment Variables
 
@@ -177,18 +191,3 @@ routes = [
 /cmd prompt <PROMPT> # 设置ChatGPT Prompt
 /cmd clear # 清除WeChat-ChatGPT保存的会话记录
 ```
-
-## ✨ Contributor
-
-<a href="https://github.com/fuergaosi233/wechat-chatgpt/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=fuergaosi233/wechat-chatgpt" />
-</a>
-
-## 🤝 为项目添砖加瓦
-
-欢迎提出 Contributions, issues 与 feature requests!<br />
-随时查看 [issues page](https://github.com/fuergaosi233/wechat-chatgpt/issues).
-
-## 感谢支持 🙏
-
-如果这个项目对你产生了一点的帮助，请为这个项目点上一颗 ⭐️
