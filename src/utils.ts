@@ -1,6 +1,7 @@
 import {ChatCompletionRequestMessage} from "openai";
 import GPT3TokenizerImport from 'gpt3-tokenizer';
 import {config} from "./config.js";
+import { Message } from "wechaty";
 
 const GPT3Tokenizer: typeof GPT3TokenizerImport =
   typeof GPT3TokenizerImport === 'function'
@@ -28,4 +29,8 @@ export function isTokenOverLimit(chatMessage:ChatCompletionRequestMessage[]): bo
     limit = 4096;
   }
   return calTokens(chatMessage) > limit;
+}
+
+export const getMentionTxt = (txt: string) => {
+  return txt.match(/：([^：\n\r]*)」/)?.[1] || ''
 }

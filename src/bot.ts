@@ -12,6 +12,9 @@ import { handleAudio, isAudioMessage } from "./messages/handleAudio.js";
 import { MessageType } from "./interface.js";
 import { handleCmd, isCmdMessage } from "./messages/handleCmd.js";
 import { handleImgGen, isGenImgMessage } from "./messages/handleGenImg.js";
+import { handlePing, isPingMessage } from "./messages/handlePing.js";
+import { getMentionTxt } from "./utils.js";
+import { handleImage, isImageMessage } from "./messages/handleImg.js";
 
 const SINGLE_MESSAGE_MAX_SIZE = 500;
 export type Speaker = RoomImpl | ContactImpl;
@@ -59,13 +62,16 @@ export class ChatGPTBot {
       text = text.replace(this.chatGroupTriggerRegEx, "");
       text = chatTriggerRule ? text.replace(chatTriggerRule, "") : text;
     }
+
+    const mentionText = getMentionTxt(rawText).trim();
+
     // remove more text via - - - - - - - - - - - - - - -
-    return text;
+    return mentionText ? `${mentionText}。\n${text}` : text;
   }
-  async getGPTMessage(talkerName: string,text: string): Promise<string> {
-    let gptMessage = await chatgpt(talkerName,text);
-    if (gptMessage !=="") {
-      DBUtils.addAssistantMessage(talkerName,gptMessage);
+  async getGPTMessage(talkerName: string, text: string): Promise<string> {
+    let gptMessage = await chatgpt(talkerName, text);
+    if (gptMessage !== "") {
+      DBUtils.addAssistantMessage(talkerName, gptMessage);
       return gptMessage;
     }
     return "Sorry, please try again later. 😔";
@@ -178,7 +184,12 @@ export class ChatGPTBot {
         `🚪 Room: ${topic} 🤵 Contact: ${talker.name()} 💬 Text: ${rawText}`
       );
     }
-    if (this.isNonsense(talker, messageType, rawText)) {
+
+    if (isImageMessage(message)) {
+      return handleImage(message);
+    } else if (isPingMessage(message)) {
+      return handlePing(message);
+    } else if (this.isNonsense(talker, messageType, rawText)) {
       return;
     } else if (isAudioMessage(message)) {
       return handleAudio(message);

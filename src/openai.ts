@@ -22,7 +22,7 @@ async function chatgpt(username: string, message: string): Promise<string> {
   DBUtils.addUserMessage(username, message);
   const messages = DBUtils.getChatMessage(username);
 
-  console.log(messages);
+  console.log(messages)
 
   try {
     const { data } = await openai.createChatCompletion({
